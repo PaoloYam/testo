@@ -1,0 +1,50 @@
+version: "3.9"
+services:
+    postgre:
+        image: postgres:15.2
+        container_name: postgres
+        environment:
+            POSTGRES_DB: test
+            POSTGRES_USER: root
+            POSTGRES_PASSWORD: pswd
+        ports:
+          - 5432:5432
+        networks:  
+            - transcendence
+        volumes:
+            - db:/var/lib/postgresql/data
+        restart: always
+
+    back:
+        build: docker/back
+        ports:
+            - '4000:4000'
+        depends_on:
+            - postgre
+        container_name: back
+        volumes:
+            - "./back:/usr/src/app"
+        networks:
+            - transcendence
+        working_dir: /usr/src/app
+        restart: always
+        env_file:
+            - .env
+    
+    front:
+        tty: true
+        build: docker/front
+        ports:
+            - '3000:3000'
+        container_name: front
+        volumes:
+            - "./front:/usr/src/app"
+        networks:
+            - transcendence
+        working_dir: /usr/src/app
+        restart: always
+
+networks:
+    transcendence:
+volumes:
+    db:
